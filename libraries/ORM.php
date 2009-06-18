@@ -119,11 +119,11 @@ class ORM_Core {
 			$this->find($id);
 		}
 		
-		if(!is_null($father) && in_array($father->table_name,$this->belongs_to)){
+		if(!is_null($father) && in_array($father->table_name, $this->belongs_to)){
 			/*
-			 * Save object related parent, so it can be called with 
-			 * '$this->parent(parent_table_name)' instead of loading it
-			 * again doing '$this->parent_table_name'
+			 * Save object related father, so it can be called with 
+			 * '$this->father(father_table_name)' instead of doing
+			 * '$this->parent_table_name' wich would create a new object
 			 */
 			$this->fathers[$father->table_name] = $father;
 		}
@@ -467,8 +467,9 @@ class ORM_Core {
 
 	/**
 	 * Returns the parent of this object passed in the parameter
-	 *
-	 * @return  ORM
+	 * 
+	 * @param string $father_table
+	 * @return  mixed
 	 */
 	public function father($father_table){
 		if(in_array($father_table,$this->belongs_to) && $this->loaded){
@@ -483,8 +484,9 @@ class ORM_Core {
 	
 	/**
 	 * Returns a set of children from this object
-	 *
-	 * @return  Array
+	 * 
+	 * @param string $children_table
+	 * @return  mixed
 	 */
 	public function children($children_table){
 		if(in_array($children_table,$this->has_many) && $this->loaded){
@@ -1478,4 +1480,3 @@ class ORM_Core {
 	}
 
 } // End ORM
-
