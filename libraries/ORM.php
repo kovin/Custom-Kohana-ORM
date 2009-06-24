@@ -332,13 +332,9 @@ class ORM_Core {
 			// one<>many relationship
 			$model = ORM::factory(inflector::singular($column));
 			
-			$children_iterator = $this->related[$column] = $model
+			return $this->related[$column] = $model
 				->where($this->foreign_key($column, $model->table_name), $this->object[$this->primary_key])
-				->find_all(NULL,NULL,$this);
-
-			$this->children[$model->table_name] = $children_iterator->as_array();
-			 
-			return $children_iterator; 
+				->find_all(NULL,NULL,$this); 
 		}
 		elseif (in_array($column, $this->has_and_belongs_to_many))
 		{
