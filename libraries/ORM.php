@@ -467,32 +467,41 @@ class ORM_Core {
 	 * @return  void
 	 */	
   	public function __clone(){
-  		// Get original object children, to clone them later
   		$all_children = array();
-  		foreach($this->has_many as $child_table){
-  			$all_children[] = $this->$child_table;
-  		}
+  		 // Get original object children, to clone them later
+	 	foreach( $this->has_many as $child_table ){
+			$all_children[] = $this->$child_table;
+  		}  		 	
   		
   		$this->loaded	= FALSE;
   		$this->saved	= FALSE;
   		$pkey			= $this->primary_key;
   		$this->$pkey	= NULL;
-  		$this->changed	= array_diff(array_keys($this->table_columns),array($pkey));
+  		/*
+  		 * All table columns will be set with this ORM model current values, except
+  		 * the primary key column which will be set automatically (the pk field should
+  		 * be autonumeric in DB)
+  		 */ 
+  		$this->changed	= array_diff( array_keys( $this->table_columns ), array( $pkey ) );
   		$this->save();
   		
-  		// Clone children
-  		$parent_field = $this->table_name."_id";
-  		foreach($all_children as $children){
+  	  	// Clone children
+ 		$parent_field = $this->table_name."_id";
+  		foreach( $all_children as $children ){
   			// If chidren have the parent id field, clone them
-  			if(count($children) && in_array($parent_field,array_keys($children[0]->table_columns)))
-  			foreach($children as $child){
-	  			$new_child					= clone $child;
-	  			$new_child->$parent_field	= $this->id;
-	  			$new_child->save();  					
+  			if( count($children) && in_array( $parent_field, array_keys( $children[0]->table_columns ) ) )
+  			{
+  				foreach($children as $child)
+  				{
+  					$child->$parent_field	= $this->id;
+  					$new_child				= clone $child;
+  					$new_child->save();
+  				}
   			}
   		}
+
   	}
-	
+  	
 	/**
 	 * Returns the parent of this object passed in the parameter
 	 * 
