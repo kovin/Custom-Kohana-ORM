@@ -24,6 +24,7 @@ class ORM_Core {
 	protected $has_many					= array();
 	protected $children					= array();
 	protected $has_and_belongs_to_many	= array();
+	protected $dont_clone				= array();
 
 	// Relationships that should always be joined
 	protected $load_with = array();
@@ -470,7 +471,7 @@ class ORM_Core {
   		$all_children = array();
   		 // Get original object children, to clone them later
 	 	foreach( $this->has_many as $child_table ){
-			$all_children[] = $this->$child_table;
+			$all_children[$child_table] = $this->$child_table;
   		}  		 	
   		
   		$this->loaded	= FALSE;
@@ -482,15 +483,18 @@ class ORM_Core {
   		 * the primary key column which will be set automatically (the pk field should
   		 * be autonumeric in DB)
   		 */ 
-  		$this->changed	= array_diff( array_keys( $this->table_columns ), array( $pkey ) );
+  		$this->changed	= array_diff(array_keys($this->table_columns), array($pkey));
   		$this->save();
   		
   	  	// Clone children
  		$parent_field = $this->table_name."_id";
-  		foreach( $all_children as $children ){
-  			// If chidren have the parent id field, clone them
-  			if( count($children) && in_array( $parent_field, array_keys( $children[0]->table_columns ) ) )
-  			{
+  		foreach($all_children as $children_table=>$children){
+  			// If chidren have the parent id field and their table name is not present
+  			// in the $dont_clone array, clone them
+  			if(	count($children)
+  				AND in_array($parent_field, array_keys( $children[0]->table_columns))
+  				AND !in_array($children_table, $this->dont_clone)
+  			){
   				foreach($children as $child)
   				{
   					$child->$parent_field	= $this->id;
